@@ -1,13 +1,19 @@
-const {ipcMain} = require('electron');
+const {webContents,ipcMain} = require('electron');
 
 class Receiver {
     constructor() {
         
     }
+    init(){
+        this.receiveInfo()
+    }
     receiveInfo(){
-        ipcMain.on('download',(event, arg)=>{
-            
+        ipcMain.on('startdownload',(event, arg)=>{
+            console.log(arg)
+            webContents.downloadURL(arg)
         })
     }
 
 }
+
+new Receiver().init()

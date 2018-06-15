@@ -5,14 +5,16 @@ class DownloadBlock {
 
     }
     initBlock(){
-
+        this.sendDownloadMS()
     }
     sendDownloadMS(){
-        let downloadBtn = $('#downloadButton');
-        let downloadUrl = $('#downloadUrl').val();
-        if(!downloadUrl) return
-        downloadBtn.on('click',(event)=>{
-            ipcRenderer.send('download',downloadUrl)
+        let downloadBtn = document.getElementById('downloadButton')
+        let downloadUrl = document.getElementById('downloadUrl')
+        downloadBtn.addEventListener('click',(event)=>{
+            console.log(888)
+            console.log("666",downloadUrl)
+            ipcRenderer.send('startdownload',downloadUrl)
         })
     }
 }
+new DownloadBlock().initBlock()
