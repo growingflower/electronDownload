@@ -20,6 +20,6 @@
     "electron": "^2.0.0"
   },
   "dependencies": {
-    "art-template": "^4.12.1"
+    "art-template": "^4.12.2"
   }
 }

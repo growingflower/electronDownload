@@ -1,4 +1,4 @@
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow,ipcMain,shell} = require('electron');
 const path = require('path');
 const glob = require('glob');
 
@@ -8,7 +8,6 @@ class DemoDownload {
     }
 
     init(){
-      this.loadmainJs();
       this.initApp();
     }
 
@@ -23,6 +22,8 @@ class DemoDownload {
       this.mainWindow.on('closed',() => {
         this.mainWindow = null;
       });
+      this.initReceiveInfo(this.mainWindow);
+      this.listenToDownload(this.mainWindow);
     }
 
     initApp(){
@@ -41,10 +42,64 @@ class DemoDownload {
       })
     }
 
-    loadmainJs(){
-      const otherMainJs = path.join(__dirname, 'mainProcess/**/*.js');
-      const files = glob.sync(otherMainJs);
-      files.forEach((file) => { require(file) })
+    initReceiveInfo(win){
+      ipcMain.on('startdownload',(event, arg) => {
+        try{
+          win.webContents.downloadURL("file:///Users/wuqian/Desktop/electronDownload/clientDownloadnew/index.html")
+        }catch(err){
+          console.log(err)
+        }
+      })
+    }
+
+    listenToDownload(win){
+      try{
+        win.webContents.session.on('will-download', (event, item, webContents) => {
+          try{
+            let filesize = item.getTotalBytes();
+            let startTime = item.getStartTime();
+            let downloadedSize = item.getReceivedBytes();
+            let filename = item.getFilename();
+            let fileUrl = item.getURL();
+            let flieInfos = [];
+            flieInfos.push(filesize,startTime,downloadedSize,filename,fileUrl);
+            let flieString = flieInfos.join("+");
+            webContents.send('downloading',flieString)
+            ipcMain.on('cancelDownload',(event,arg)=>{
+              item.cancel()
+            })
+            ipcMain.on('continueDownload',(event,arg)=>{
+              item.resume()
+            })
+            ipcMain.on('pauseDownload',(event,arg)=>{
+              item.pause()
+            })
+            item.on('done',(event, state)=>{
+              if (state === 'completed') {
+                console.log('Download successfully')
+                webContents.send('completed',state)
+                ipcMain.on('openDir',(event,arg)=>{
+                  console.log("eee",fileUrl)
+                  shell.showItemInFolder(fileUrl)
+                })
+              } else {
+                console.log(`Download failed: ${state}`)
+              }
+            })
+            item.on('updated',(event, state)=>{
+              if (item.isPaused()) {  
+                console.log('Download is paused')  
+              }
+            })
+          }catch(err){
+            console.log(err)
+          }
+         
+        })
+      }catch(err){
+        console.log(err)
+      }
+      
     }
 }
 

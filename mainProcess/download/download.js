@@ -10,7 +10,8 @@ class Receiver {
     receiveInfo(){
         ipcMain.on('startdownload',(event, arg)=>{
             console.log(arg)
-            webContents.downloadURL(arg)
+            let allwins = webContents.getAllWebContents();
+            allwins.webContents.downloadURL()
         })
     }
 
