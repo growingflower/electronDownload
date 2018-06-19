@@ -215,6 +215,7 @@
     // 打开文件夹按钮
     $('.body .con').on('click', '.fileItem .openDir', function (e) {
       //var index = $(this).parents('.fileItem').data('index')
+      console.log($(this))
       var name = $(this).parents('.fileItem').find('.data').data('item').name;
 
     });
