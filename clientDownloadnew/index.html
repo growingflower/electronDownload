@@ -82,11 +82,17 @@
                 <span class="pause">
                         暂停
                     </span>
+                <span class="continue" style = "display:none">
+                  继续
+                </span>
                 <span class="cancel ml10">
                         取消
                     </span>
                 {{/if}}
                 {{if status === 2|| status === 5}}
+                <span class="pause" style = "display:none">
+                  暂停
+                </span>
                 <span class="continue">
                         继续
                     </span>
@@ -197,20 +203,20 @@
     });
 
     // 暂停按钮
-    $('.body .con').on('click', '.fileItem .pause', function (e) {
-      var value = $(this).parents('.fileItem').find('.data').data('item');
-      updateFile(value.id, Object.assign({}, value, {
-        status: STATUS.paused
-      }));
-    });
+    // $('.body .con').on('click', '.fileItem .pause', function (e) {
+    //   var value = $(this).parents('.fileItem').find('.data').data('item');
+    //   updateFile(value.id, Object.assign({}, value, {
+    //     status: STATUS.paused
+    //   }));
+    // });
 
     // 继续按钮
-    $('.body .con').on('click', '.fileItem .continue', function (e) {
-      var value = $(this).parents('.fileItem').find('.data').data('item');
-      updateFile(value.id, Object.assign({}, value, {
-        status: STATUS.progressing
-      }));
-    });
+    // $('.body .con').on('click', '.fileItem .continue', function (e) {
+    //   var value = $(this).parents('.fileItem').find('.data').data('item');
+    //   updateFile(value.id, Object.assign({}, value, {
+    //     status: STATUS.progressing
+    //   }));
+    // });
 
     // 打开文件夹按钮
     $('.body .con').on('click', '.fileItem .openDir', function (e) {
@@ -256,254 +262,254 @@
   template.defaults.imports.mathceil = function (value) {
     return Math.ceil(value);
   };
-  // var data = [
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 3,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'achieve_success.png',
-  //     url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
-  //     status: 2,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: '考勤报表 (6) (1).xlsx',
-  //     url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
-  //     status: 0,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'typora_latest.zip',
-  //     url: 'https://typora.io/download/typora_latest.zip?',
-  //     status: 1,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   },
-  //   {
-  //     name: 'Swagger UI.htm',
-  //     url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
-  //     status: 4,
-  //     downloaded: 1000000,
-  //     total: 8000000,
-  //     speed: 1000
-  //   }
-  // ].map(function (v) {
-  //   return Object.assign({}, v, {
-  //     id: Array.apply(null, new Array(5)).
-  //       map(a => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)).
-  //       join('-')
-  //   });
-  // });
+  var data = [
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: '考勤报表 (6) (1).xlsx',
+    //   url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+    //   status: 0,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'typora_latest.zip',
+    //   url: 'https://typora.io/download/typora_latest.zip?',
+    //   status: 1,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 4,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: '考勤报表 (6) (1).xlsx',
+    //   url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+    //   status: 0,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'typora_latest.zip',
+    //   url: 'https://typora.io/download/typora_latest.zip?',
+    //   status: 1,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 4,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: '考勤报表 (6) (1).xlsx',
+    //   url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+    //   status: 0,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'typora_latest.zip',
+    //   url: 'https://typora.io/download/typora_latest.zip?',
+    //   status: 1,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 4,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: '考勤报表 (6) (1).xlsx',
+    //   url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+    //   status: 0,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'typora_latest.zip',
+    //   url: 'https://typora.io/download/typora_latest.zip?',
+    //   status: 1,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 4,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: '考勤报表 (6) (1).xlsx',
+    //   url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+    //   status: 0,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'typora_latest.zip',
+    //   url: 'https://typora.io/download/typora_latest.zip?',
+    //   status: 1,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 4,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'Swagger UI.htm',
+    //   url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+    //   status: 3,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    // {
+    //   name: 'achieve_success.png',
+    //   url: 'https://dn-mdmedia.qbox.me/c3e51f8d-f083-4e15-a768-d5ea944358c8/2017/6/25/921e6129-c1a6-3fcc-f0a5-91944d707153.png?attname=achieve_success.png',
+    //   status: 2,
+    //   downloaded: 1000000,
+    //   total: 8000000,
+    //   speed: 1000
+    // },
+    {
+      name: '考勤报表 (6) (1).xlsx',
+      url: 'http://www.njcgs.com/UploadFiles/file/201707/14997367138771147.xls',
+      status: 0,
+      downloaded: 1000000,
+      total: 8000000,
+      speed: 1000
+    },
+    {
+      name: 'typora_latest.zip',
+      url: 'https://typora.io/download/typora_latest.zip?',
+      status: 1,
+      downloaded: 1000000,
+      total: 8000000,
+      speed: 1000
+    },
+    {
+      name: 'Swagger UI.htm',
+      url: 'http://develop.check.d.mingdao.net/swagger/#!/AttendanceGroupReport/addAttendanceGroupReport',
+      status: 4,
+      downloaded: 1000000,
+      total: 8000000,
+      speed: 1000
+    }
+  ].map(function (v) {
+    return Object.assign({}, v, {
+      id: Array.apply(null, new Array(5)).
+        map(a => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)).
+        join('-')
+    });
+  });
 
   var STATUS = {
     error: 0,
@@ -517,7 +523,7 @@
   bindEvent();
 
   // 渲染整个列表
-  // render(data);
+  render(data);
 
   //   添加文件
   // var fileValue = {

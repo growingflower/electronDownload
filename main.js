@@ -69,7 +69,8 @@ class DemoDownload {
             //savedownloaditems
             itemsCollection.insert({name:filename,startTime:startTime, downloaditem: item,webContents:webContents});
             let downloaditem = itemsCollection.find({'startTime':startTime})[0].downloaditem;
-            item.setSavePath('/Users/mingdao/Downloads/'+filename);
+            // item.setSavePath('/Users/mingdao/Downloads/'+filename);
+            item.setSavePath('/Users/wuqian/Downloads/'+filename);
             webContents.send('downloading',flieString)
             ipcMain.on('downloadingInfo',(event,arg) => {
               let fileInfos = arg.split("+");
@@ -90,16 +91,16 @@ class DemoDownload {
 
     listenToOneItem(downloaditeminfo,webContents){
       let downloaditem = downloaditeminfo[0].downloaditem;
-      let fileurl = '/Users/mingdao/Downloads/' + downloaditeminfo[0].name;
+      // let fileurl = '/Users/mingdao/Downloads/' + downloaditeminfo[0].name;
+      let fileurl = app.getPath('downloads') + downloaditeminfo[0].name;
       ipcMain.on('cancelDownload',(event,arg)=>{
         downloaditem.cancel()
       });
 
       ipcMain.on('continueDownload',(event,arg)=>{
-        console.log(111)
-        if(downloadItem.canResume()){
-          downloaditem.resume()
-        }
+        console.log(222) 
+        console.log(downloaditem.isDestroyed(),'22222')
+        downloaditem.resume()
       });
 
       ipcMain.on('pauseDownload',(event,arg)=>{
@@ -113,6 +114,9 @@ class DemoDownload {
           ipcMain.on('openDir',(event,arg)=>{
             shell.showItemInFolder(fileurl)
           })
+        }else if(state === 'cancelled'){
+          webContents.send('interrupted')
+          console.log(`Download failed: ${state}`)
         } else {
           webContents.send('interrupted')
           console.log(`Download failed: ${state}`)

@@ -107,6 +107,8 @@ class DownloadBlock {
                     status:  STATUS.error
                   }));      
             }) 
+            let retryBtn = document.getElementsByClassName('retry');
+            this.addClassEvent(retryBtn,'retryDownload',fileValue);  
            
         })
         
@@ -115,61 +117,50 @@ class DownloadBlock {
     addClassEvent(elements,type,fileValue){
         switch(type){
             case "openDir":
-                $.each(elements,function(idx,element){
-                    element.addEventListener('click',()=>{
-                        console.log(111)
-                        ipcRenderer.send('openDir');
-                    }) 
-                })
+                $('.body .con').on('click', '.fileItem .openDir', function (e) {
+                    var name = $('.openDir').parents('.fileItem').find('.data').data('item').name;
+                    ipcRenderer.send('openDir');
+                });
                 break;
             case "cancelDownload":
-                $.each(elements,function(idx,element){
-                    element.addEventListener('click',()=>{
-                        updateFile(fileValue.id, Object.assign({}, fileValue, {
-                            status:  STATUS.cancaled 
-                        }));
-                        ipcRenderer.send('cancelDownload');
-                    })
-                })
+                $('.body .con').on('click', '.fileItem .cancel', function (item) {
+                    var value = $('.cancel').parents('.fileItem').find('.data').data('item');
+                    updateFile(value.id, Object.assign({}, value, {
+                    status: STATUS.cancaled
+                    }));
+                    ipcRenderer.send('cancelDownload');
+                    console.log('取消 id.', value.id, ' ' + value.name);
+                });
+          
                 break;
             case "continueDownload":
-                $.each(elements,function(idx,element){
-                    element.addEventListener('click',()=>{
-                        console.log('continueDownloadelement',element)
-                        let count = 1
-                        count++
-                        console.log('continueDownload')
-                        console.log('count',count)
-                        updateFile(fileValue.id, Object.assign({}, fileValue, {
-                            status:STATUS.paused 
-                        }));
-                        ipcRenderer.send('continueDownload');
-                    })
-                })
+                $('.body .con').on('click', '.fileItem .continue', function (e) {
+                    var value = $('.continue').parents('.fileItem').find('.data').data('item');
+                    updateFile(value.id, Object.assign({}, value, {
+                    status: STATUS.progressing
+                    }));
+                    ipcRenderer.send('continueDownload');
+                });
                 break;
             case "pauseDownload":
-                // $.each(elements,function(idx,element){
-                //     element.addEventListener('click',()=>{
-                //         console.log('pauseDownloadelement',element)
-                //         let count = 1
-                //         count++
-                //         console.log('pauseDownload')
-                //         console.log('count',count)
-                //         updateFile(fileValue.id, Object.assign({}, fileValue, {
-                //             status:  STATUS.progressing 
-                //         }));
-                //         ipcRenderer.send('pauseDownload');
-                //     })
-                // })
                 $('.body .con').on('click', '.fileItem .pause', function (e) {
-                    console.log($(this))
-                    var value = $(this).parents('.fileItem').find('.data').data('item');
-                    console.log(value,"value")
+                    var value = $('.pause').parents('.fileItem').find('.data').data('item');
                     updateFile(value.id, Object.assign({}, value, {
                       status: STATUS.paused
                     }));
-                    ipcRenderer.send('pauseDownload');
-                  });
+                    ipcRenderer.send('pauseDownload',value.url);
+                });
+                break;
+            case "retryDownload":
+                console.log(2222)
+                $('.body .con').on('click', '.fileItem .retry', function (e) {
+                    var value = $('.retry').parents('.fileItem').find('.data').data('item');
+                    console.log(value,"value")
+                    updateFile(value.id, Object.assign({}, value, {
+                      status: STATUS.progressing
+                    }));
+                    ipcRenderer.send('startdownload',url)
+                });
                 break;
             default:
                 console.log('err')
