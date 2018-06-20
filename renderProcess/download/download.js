@@ -5,7 +5,7 @@ class DownloadBlock {
     }
     initBlock(){
         this.sendDownloadMS();
-       
+        this.listenDownloading();
     }
     sendDownloadMS(){
         let downloadBtn = document.getElementById('downloadButton')
@@ -14,7 +14,6 @@ class DownloadBlock {
             let url = $.trim(downloadUrlinput.value);
             if(url){
                 ipcRenderer.send('startdownload',url)
-                this.listenDownloading();
             }else{
                 return
             }
@@ -33,23 +32,21 @@ class DownloadBlock {
                 'downloaded': 0,
                 'total': filesize,
                 'speed': 0,
-                'id': Array.apply(null, new Array(5)).
-                    map(a => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)).
-                    join('-')
+                'id':startTime*1000000
                 };
             addFile(fileValue)
-            ipcRenderer.on('receivedBytes',(event,arg,speed,completedbytes)=>{
+            ipcRenderer.on('receivedBytes',(event,arg,speed,completedbytes,startTime)=>{
                 fileValue.downloaded = Number(arg);
-                updateFile(fileValue.id, Object.assign({}, fileValue, {
+                updateFile(startTime*1000000, Object.assign({}, fileValue, {
                         downloaded:completedbytes,
                         speed:speed,
                         status: fileValue.downloaded === fileValue.total ? STATUS.completed : STATUS.progressing
                       }));
-                this.addClassEvent('cancelDownload',fileValue);   
-                this.addClassEvent('continueDownload',fileValue);   
-                this.addClassEvent('pauseDownload',fileValue);   
-                
             })
+            this.addClassEvent('cancelDownload',fileValue);   
+            this.addClassEvent('continueDownload',fileValue);   
+            this.addClassEvent('pauseDownload',fileValue);   
+                
             ipcRenderer.on('isPaused',(event,arg)=>{
                 // updateFile(fileValue.id, Object.assign({}, fileValue, {
                 //     status:STATUS.paused

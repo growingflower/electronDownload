@@ -50,7 +50,7 @@ class DemoDownload {
         try{
           // "https://dldir1.qq.com/qqfile/QQIntl/QQi_PC/QQIntl2.11.exe"
           // "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.4.0.dmg"  testurl
-          win.webContents.downloadURL("https://docs.qq.com/?adtag=QQxiazaiyeanniu#id-home-download")
+          win.webContents.downloadURL("http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.4.0.dmg")
         }catch(err){
           console.log(err)
         }
@@ -79,8 +79,8 @@ class DemoDownload {
             let itembeginning = itemsCollection.insert({itemid:startTime.toString(),downloaditem:item})
             // itemsCollection.insert({name:filename,startTime:startTime, downloaditem: item,webContents:webContents});
             // let downloaditem = itemsCollection.find({'startTime':startTime})[0].downloaditem;
-            item.setSavePath('/Users/mingdao/Downloads/'+filename);
-            // item.setSavePath('/Users/wuqian/Downloads/'+filename);
+            // item.setSavePath('/Users/mingdao/Downloads/'+filename);
+            item.setSavePath('/Users/wuqian/Downloads/'+filename);
             webContents.send('downloading',flieString)
             // ipcMain.on('downloadingInfo',(event,arg) => {
             //   let fileInfos = arg.split("+");
@@ -150,7 +150,7 @@ class DemoDownload {
             completedbytes += receivedBytes;
             let speed = completedbytes/(Number(new Date().getTime()/1000) - Number(startTime))
             itemsCollection.update(itembeginning)
-            webContents.send('receivedBytes',receivedBytes,speed,completedbytes)
+            webContents.send('receivedBytes',receivedBytes,speed,completedbytes,startTime)
           }
         }
       }) ;
