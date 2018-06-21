@@ -1,18 +1,32 @@
 const {ipcRenderer} = nodeRequire('electron');
+const {dialog} = nodeRequire('electron').remote
+
 
 class DownloadBlock {
     constructor(){
     }
     initBlock(){
+        console.log(222)
         this.sendDownloadMS();
         this.listenDownloading();
+    }
+    checkIsDownloading (url){
+        let downloading = $('.fileItem').find('.data')
+        for(let i = 0; i<downloading.length; i++){
+            if(JSON.parse(downloading[i].getAttribute('data-item')).url === url){
+                let opts = {type:'info',message:"item is in DownloadingList"}
+                dialog.showMessageBox(opts)
+                return false
+            }
+            return true
+        }
     }
     sendDownloadMS(){
         let downloadBtn = document.getElementById('downloadButton')
         let downloadUrlinput = document.getElementById('downloadUrl')
         downloadBtn.addEventListener('click',(event)=>{
             let url = $.trim(downloadUrlinput.value);
-            if(url){
+            if(url && this.checkIsDownloading(url)){
                 ipcRenderer.send('startdownload',url)
             }else{
                 return
@@ -20,14 +34,28 @@ class DownloadBlock {
         })
     }
 
+    getNewfileSatus(downloadingInfos){
+        let fileValue = {
+            'name': downloadingInfos.filename,
+            'url': downloadingInfos.url,
+            'status': 1,
+            'downloaded':downloadingInfos.hasDownloadedBytes,
+            'total': downloadingInfos.totalBytes,
+            'speed': 0,
+            'id':downloadingInfos.startTime*1000000
+            };
+        return fileValue
+    }
+
     listenDownloading(){
-        ipcRenderer.on("downloading",(event, arg)=>{
+        console.log(3333)
+        ipcRenderer.on("downloading",(event, downloadItemInfos)=>{
+            console.log(1111)
             // ipcRenderer.send('downloadingInfo',arg)
-            let fileInfos = arg.split("+")
-            let [filesize,startTime,filename,fileUrl] = fileInfos
+            let {filesize,startTime,filename,url} = downloadItemInfos
             let fileValue = {
                 'name': filename,
-                'url': fileUrl,
+                'url': url,
                 'status': 1,
                 'downloaded': 0,
                 'total': filesize,
@@ -35,35 +63,42 @@ class DownloadBlock {
                 'id':startTime*1000000
                 };
             addFile(fileValue)
-            ipcRenderer.on('receivedBytes',(event,arg,speed,completedbytes,startTime)=>{
+            ipcRenderer.on('receivedBytes',(event,arg,speed,hasDownloadedBytes,startTime,fileUrl,filename,filesize)=>{
                 fileValue.downloaded = Number(arg);
                 updateFile(startTime*1000000, Object.assign({}, fileValue, {
-                        downloaded:completedbytes,
+                        downloaded:hasDownloadedBytes,
                         speed:speed,
+                        name:filename,
+                        fileUrl:fileUrl,
+                        total:filesize,
                         status: fileValue.downloaded === fileValue.total ? STATUS.completed : STATUS.progressing
                       }));
             })
-            this.addClassEvent('cancelDownload',fileValue);   
             this.addClassEvent('continueDownload',fileValue);   
-            this.addClassEvent('pauseDownload',fileValue);   
+            this.addClassEvent('pauseDownload',fileValue);  
+            this.addClassEvent('cancelDownload',fileValue);  
+
                 
-            ipcRenderer.on('isPaused',(event,arg)=>{
-                // updateFile(fileValue.id, Object.assign({}, fileValue, {
-                //     status:STATUS.paused
-                //   }));
+            ipcRenderer.on('isPaused',(event,downloadingInfos)=>{
+                let newFile = this.getNewfileSatus(downloadingInfos)
+                newFile.status = STATUS.paused
+                let startTime = downloadingInfos.startTime*1000000;
+                updateFile(startTime, Object.assign({}, fileValue,newFile ));
             })
-            ipcRenderer.on('completed',(event,arg)=>{
-                updateFile(fileValue.id, Object.assign({}, fileValue, {
-                        status:  STATUS.completed
-                      }));                
-              this.addClassEvent('openDir',fileValue)
+            ipcRenderer.on('completed',(event,downloadingInfos)=>{
+                let newFile = this.getNewfileSatus(downloadingInfos)
+                newFile.status = STATUS.completed
+                let startTime = downloadingInfos.startTime*1000000;
+                updateFile(startTime, Object.assign({}, fileValue, newFile));                
             })   
-            ipcRenderer.on('interrupted',(event,arg)=>{
-                updateFile(fileValue.id, Object.assign({}, fileValue, {
-                    status:  STATUS.error
-                  }));      
+            this.addClassEvent('openDir',fileValue);
+            ipcRenderer.on('cancelled',(event,downloadingInfos)=>{
+                let newFile = this.getNewfileSatus(downloadingInfos)
+                newFile.status = STATUS.cancaled;
+                let startTime = downloadingInfos.startTime*1000000;
+                console.log("startTime",startTime)
+                updateFile(startTime, Object.assign({}, fileValue, newFile));      
             }) 
-            let retryBtn = document.getElementsByClassName('retry');
             this.addClassEvent('retryDownload',fileValue);  
            
         })
@@ -75,89 +110,46 @@ class DownloadBlock {
         switch(type){
             case "openDir":
                 $("#"+id).on('click','.openDir',function(e){
-                    console.log('openDir')
                     let value = $('.openDir').parents('.fileItem').find('.data').data('item').name;
-                    ipcRenderer.send('openDir');
+                    ipcRenderer.send('openDir',id);
                 })
-                // $('.body .con').on('click', '.fileItem .openDir', function (e) {
-                //     var name = $('.openDir').parents('.fileItem').find('.data').data('item').name;
-                //     ipcRenderer.send('openDir');
-                // });
                 break;
             case "cancelDownload":
-                $("#"+id).on('click','.cancel',function(e){
-                    console.log('cancel')
+                $("#"+id).on('click','.cancel.ml10',function(e){
                     let value = $('.cancel').parents('.fileItem').find('.data').data('item');
                     updateFile(id, Object.assign({}, value, {
                             status: STATUS.cancel
                     }));
-                    ipcRenderer.send('cancelDownload');
+                    ipcRenderer.send('cancelDownload',id);
                 })
-                // $('.body .con').on('click', '.fileItem .cancel', function (item) {
-                //     var value = $('.cancel').parents('.fileItem').find('.data').data('item');
-                //     updateFile(value.id, Object.assign({}, value, {
-                //     status: STATUS.cancaled
-                //     }));
-                //     ipcRenderer.send('cancelDownload');
-                //     console.log('取消 id.', value.id, ' ' + value.name);
-                // });
-          
                 break;
             case "continueDownload":
                 $("#"+id).on('click','.continue',function(e){
-                    console.log('continue')
                     let value = $('.continue').parents('.fileItem').find('.data').data('item');
                     updateFile(id, Object.assign({}, value, {
                             status: STATUS.cancel
                     }));
-                    ipcRenderer.send('continueDownload');
+                    ipcRenderer.send('continueDownload',id);
                 })
-                // $('.body .con').on('click', '.fileItem .continue', function (e) {
-                //     var value = $('.continue').parents('.fileItem').find('.data').data('item');
-                //     updateFile(value.id, Object.assign({}, value, {
-                //     status: STATUS.progressing
-                //     }));
-                //     ipcRenderer.send('continueDownload');
-                // });
                 break;
             case "pauseDownload":
                 $("#"+id).on('click','.pause',function(e){
-                    console.log('pause')
-                    let count = 0;
-                    count++
-                    console.log(count)
                     let value = $('.pause').parents('.fileItem').find('.data').data('item');
                     updateFile(id, Object.assign({}, value, {
                                 status: STATUS.paused
                     }));
-                    ipcRenderer.send('pauseDownload');
+                    ipcRenderer.send('pauseDownload',id);
                 })
-                // $('.body .con').on('click', '.fileItem .pause', function (e) {
-                //     var value = $('.pause').parents('.fileItem').find('.data').data('item');
-                //     updateFile(value.id, Object.assign({}, value, {
-                //       status: STATUS.paused
-                //     }));
-                //     ipcRenderer.send('pauseDownload',value.url);
-                // });
                 break;
             case "retryDownload":
                 $("#"+id).on('click','.retry',function(e){
-                    console.log('retry')
                     let value = $('.retry').parents('.fileItem').find('.data').data('item');
                     updateFile(id, Object.assign({}, value, {
-                            status: STATUS.paused
+                            status: STATUS.cancaled
                     }));
+                    let url = value.url
                     ipcRenderer.send('startdownload',url)
                 })
-
-                // $('.body .con').on('click', '.fileItem .retry', function (e) {
-                //     var value = $('.retry').parents('.fileItem').find('.data').data('item');
-                //     console.log(value,"value")
-                //     updateFile(value.id, Object.assign({}, value, {
-                //       status: STATUS.progressing
-                //     }));
-                //     ipcRenderer.send('startdownload',url)
-                // });
                 break;
             default:
                 console.log('err')

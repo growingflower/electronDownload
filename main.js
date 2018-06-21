@@ -50,11 +50,42 @@ class DemoDownload {
         try{
           // "https://dldir1.qq.com/qqfile/QQIntl/QQi_PC/QQIntl2.11.exe"
           // "http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.4.0.dmg"  testurl
-          win.webContents.downloadURL("http://dldir1.qq.com/qqfile/QQforMac/QQ_V6.4.0.dmg")
+          win.webContents.downloadURL(arg)
         }catch(err){
           console.log(err)
         }
       })
+    }
+
+    getDowanloadInfos(downloadItem){
+      let startTime = downloadItem.getStartTime();
+      let Etag = downloadItem.getETag();
+      let lastModifiedTime = downloadItem.getLastModifiedTime();
+      let URLChain = downloadItem.getURLChain();
+      let state = downloadItem.getState();
+      let contentDisposition = downloadItem.getContentDisposition();
+      let receivedBytes = downloadItem.getReceivedBytes();
+      let totalBytes = downloadItem.getTotalBytes();
+      let filename = downloadItem.getFilename();
+      let mimeType = downloadItem.getMimeType();
+      let url = downloadItem.getURL(); 
+      return {
+        startTime:startTime,
+        Etag:Etag,
+        lastModifiedTime:lastModifiedTime,
+        URLChain:URLChain,
+        state:state,
+        contentDisposition:contentDisposition,
+        receivedBytes:receivedBytes,
+        totalBytes:totalBytes,
+        filename:filename,
+        mimeType:mimeType,
+        url:url
+      }
+    }
+
+    restoreDownload(){
+      
     }
 
     listenToDownload(win){
@@ -65,23 +96,16 @@ class DemoDownload {
               dialog.showMessageBox(win,opts)
               return
             }
-            let filesize = item.getTotalBytes();
-            let startTime = item.getStartTime();
-            let filename = item.getFilename();
-            let fileUrl = item.getURL();
-            let receivedBytes = item.getReceivedBytes();
-            let getETag = item.getETag();
-            
-            let flieInfos = [];
-            flieInfos.push(filesize,startTime,filename,fileUrl);
-            let flieString = flieInfos.join("+");
+            let downloadItemInfos =  this.getDowanloadInfos(item)
+            let startTime = downloadItemInfos.startTime*1000000;
+            let filename = downloadItemInfos.filename;
             //savedownloaditems
-            let itembeginning = itemsCollection.insert({itemid:startTime.toString(),downloaditem:item})
+            let itembeginning = itemsCollection.insert({itemid:startTime,downloaditem:item})
             // itemsCollection.insert({name:filename,startTime:startTime, downloaditem: item,webContents:webContents});
             // let downloaditem = itemsCollection.find({'startTime':startTime})[0].downloaditem;
-            // item.setSavePath('/Users/mingdao/Downloads/'+filename);
-            item.setSavePath('/Users/wuqian/Downloads/'+filename);
-            webContents.send('downloading',flieString)
+            item.setSavePath('/Users/mingdao/Downloads/'+filename);
+            // item.setSavePath('/Users/wuqian/Downloads/'+filename);
+            webContents.send('downloading',downloadItemInfos)
             // ipcMain.on('downloadingInfo',(event,arg) => {
             //   let fileInfos = arg.split("+");
             //   let [filesize,startTimeBack,downloadedSize,filename,fileUrl] = fileInfos
@@ -89,41 +113,54 @@ class DemoDownload {
             //   let webContents = itemsCollection.find({'startTime':startTimeBack})[0].webContents
             //   this.listenToOneItem(downloaditeminfo,webContents,win)
             // })
-            this.listenToOneItem(item,webContents,itembeginning,win)
+            this.listenToOneItem(item,startTime,webContents,itembeginning,win)
         })
     }
 
-    listenToOneItem(downloaditem,webContents,itembeginning,win){
+    listenToOneItem(downloaditem,startTime,webContents,itembeginning,win){
       // let downloaditem = downloaditeminfo[0].downloaditem;
       // let fileurl = '/Users/mingdao/Downloads/' + downloaditeminfo[0].name;
       let fileurl = app.getPath('downloads')+'/' + downloaditem.getFilename();
-      console.log(fileurl,"mainfileurl")
       ipcMain.on('cancelDownload',(event,arg)=>{
-        downloaditem.cancel()
+        if(downloaditem.isDestroyed()){
+          console.log("destroy")
+        }
+        if(startTime == arg){
+          downloaditem.cancel()
+        }
       });
 
       ipcMain.on('continueDownload',(event,arg)=>{
-        downloaditem.resume()
+        if(startTime == arg){
+          downloaditem.resume()
+        }
       });
 
       ipcMain.on('pauseDownload',(event,arg)=>{
-        downloaditem.pause()
+        if(startTime == arg){
+          downloaditem.pause()
+        }
       });
 
       downloaditem.on('done',(event, state)=>{
+        let downloadingInfos = this.getDowanloadInfos(downloaditem)
         if (state === 'completed') {
           console.log('Download successfully')
-          webContents.send('completed',state)
+          webContents.send('completed',downloadingInfos)
           ipcMain.on('openDir',(event,arg)=>{
             console.log("mianopenDir")
             shell.showItemInFolder(fileurl)
+            ipcMain.removeAllListeners(['pauseDownload','continueDownload','cancelDownload'])
           })
         }else if(state === 'cancelled'){
-          webContents.send('interrupted')
+          webContents.send('cancelled',downloadingInfos)
           console.log(`Download failed: ${state}`)
+          ipcMain.removeAllListeners(['pauseDownload','continueDownload','cancelDownload'])
+
         } else {
-          webContents.send('interrupted')
+          webContents.send('cancelled',downloadingInfos)
           console.log(`Download failed: ${state}`)
+          ipcMain.removeAllListeners(['pauseDownload','continueDownload','cancelDownload'])
         }
       });
 
@@ -133,28 +170,37 @@ class DemoDownload {
           let opts = {type:'warning',message:" download failed"}
           dialog.showMessageBox(win,opts)
         }
+        let downloadingInfos = this.getDowanloadInfos(downloaditem)
         if (state === 'interrupted') {
           console.log('Download is interrupted but can be resumed')
         } else if (state === 'progressing') {
           if (downloaditem.isPaused()) {
             console.log('isPaused')
-            webContents.send('isPaused')
+            let hasDownloadedBytes = 0
+            hasDownloadedBytes += downloadingInfos.receivedBytes;
+            downloadingInfos.hasDownloadedBytes = hasDownloadedBytes;
+            webContents.send('isPaused',downloadingInfos)
           } else {
-            console.log(`LastModifiedTime: ${downloaditem.getLastModifiedTime()}`)
-            console.log(`getTag: ${downloaditem.getETag()}`)
             console.log(`Received bytes: ${downloaditem.getReceivedBytes()}`)
             itembeginning.downloaditem = downloaditem;
             let receivedBytes = downloaditem.getReceivedBytes();
             let startTime = downloaditem.getStartTime();
-            let completedbytes = 0
-            completedbytes += receivedBytes;
-            let speed = completedbytes/(Number(new Date().getTime()/1000) - Number(startTime))
+            let filesize = downloaditem.getTotalBytes();
+            let filename = downloaditem.getFilename();
+            let fileUrl = downloaditem.getURL(); 
+            // console.log(`StartTime: ${downloaditem.getStartTime()}`)
+            let hasDownloadedBytes = 0
+            hasDownloadedBytes += receivedBytes;
+            let speed = hasDownloadedBytes/(Number(new Date().getTime()/1000) - Number(startTime))
             itemsCollection.update(itembeginning)
-            webContents.send('receivedBytes',receivedBytes,speed,completedbytes,startTime)
+            webContents.send('receivedBytes',receivedBytes,speed,hasDownloadedBytes,startTime,fileUrl,filename,filesize)
           }
         }
       }) ;
     }
 }
+
+
+
 
 new DemoDownload().init();
