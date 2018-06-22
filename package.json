@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "art-template": "^4.12.2",
+    "lodash": "^4.17.10",
     "lokijs": "^1.5.5"
   }
 }

@@ -6,7 +6,6 @@ class DownloadBlock {
     constructor(){
     }
     initBlock(){
-        console.log(222)
         this.sendDownloadMS();
         this.listenDownloading();
     }
@@ -48,9 +47,7 @@ class DownloadBlock {
     }
 
     listenDownloading(){
-        console.log(3333)
         ipcRenderer.on("downloading",(event, downloadItemInfos)=>{
-            console.log(1111)
             // ipcRenderer.send('downloadingInfo',arg)
             let {filesize,startTime,filename,url} = downloadItemInfos
             let fileValue = {
@@ -154,7 +151,12 @@ class DownloadBlock {
             default:
                 console.log('err')
         }
-       
+    }
+    reloadActiveDownloadItems () {
+        let datas = [];
+        ipcRenderer.on('reloadActiveDownloadItems', (event,reloadData) =>{
+            
+        })
     }
 }
 new DownloadBlock().initBlock()
