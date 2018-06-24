@@ -34,7 +34,8 @@ class DemoDownload {
     createWindow(){
       let windowOpts = {
         width : 800,
-        height :600
+        height :600,
+        show:false
       };
       this.mainWindow = new BrowserWindow(windowOpts);
       let url = path.join('file://', __dirname, '/clientDownloadnew/index.html');
@@ -44,6 +45,46 @@ class DemoDownload {
       });
       this.initReceiveInfo(this.mainWindow);
       this.listenToDownload(this.mainWindow);
+      this.mainWindow.once('ready-to-show', () => {
+        let allDownloadItemsInfos = this.itemsCollection.find({});
+        for(let i = 0;i< allDownloadItemsInfos.length ; i++){
+          let downloaditem = allDownloadItemsInfos[i].downloaditem
+          // console.log(downloaditem,"downloaditemdownloaditemdownloaditemdownloaditem")
+          let opts = {
+            path : downloaditem.url,
+            urlChain : downloaditem.URLChain,
+            mimeType :downloaditem.mimeType,
+            offset : downloaditem.offset,
+            length : downloaditem.totalBytes,
+            lastModified : downloaditem.lastModifiedTime,
+            eTag : downloaditem.Etag,
+            startTime : downloaditem.startTime
+          }
+          this.restoreDownload(this.mainWindow,opts)
+        }
+        console.log(allDownloadItemsInfos,"WebContentsWebContentsWebContentsWebContents")
+        this.mainWindow.webContents.send('initAlldownloaditems',allDownloadItemsInfos)
+        this.mainWindow.show()
+      })
+      // let allDownloadItemsInfos = this.itemsCollection.find({});
+      // for(let i = 0;i< allDownloadItemsInfos.length ; i++){
+      //   let downloaditem = allDownloadItemsInfos[i].downloaditem
+      //   // console.log(downloaditem,"downloaditemdownloaditemdownloaditemdownloaditem")
+      //   let opts = {
+      //     path : downloaditem.url,
+      //     urlChain : downloaditem.URLChain,
+      //     mimeType :downloaditem.mimeType,
+      //     offset : downloaditem.offset,
+      //     length : downloaditem.totalBytes,
+      //     lastModified : downloaditem.lastModifiedTime,
+      //     eTag : downloaditem.Etag,
+      //     startTime : downloaditem.startTime
+      //   }
+      //   this.restoreDownload(this.mainWindow,opts)
+      // }
+      // console.log(allDownloadItemsInfos,"WebContentsWebContentsWebContentsWebContents")
+      // console.log(this.mainWindow.webContents)
+      // this.mainWindow.webContents.send('initAlldownloaditems',allDownloadItemsInfos)
     }
 
     initApp(){
@@ -110,17 +151,19 @@ class DemoDownload {
         totalBytes:totalBytes,
         filename:filename,
         mimeType:mimeType,
-        url:url
+        url:url,
+        offset:null
       }
     }
 
-    // restoreDownload(){
-    //   ses.createInterruptedDownload(options)
-    // }
+    restoreDownload(win,options){
+      win.webContents.session.createInterruptedDownload(options)
+    }
 
     listenToDownload(win){
-      win.webContents.session.on('will-download', (event, item, webContents) => {
-          if(null === item || null ===webContents){
+      win.webContents.session.on('will-download', (event, item, webContents ) => {
+          var webContents = win.webContents;
+          if(null === item || null === webContents){
             event.preventDefault()
             let opts = {type:'warning',message:"wrong downloadUrl"}
             dialog.showMessageBox(win,opts)
@@ -133,7 +176,7 @@ class DemoDownload {
           this.tempDownloadItems.add(item)
           this.activeDownloadItems = () => this.tempDownloadItems.size;
           //savedownloaditems
-          let itembeginning = this.itemsCollection.insert({itemid:startTime,downloaditem:item})
+          let itembeginning = this.itemsCollection.insert({itemid:startTime,downloaditem:downloadItemInfos})
           this.db.save()
           // item.setSavePath('/Users/mingdao/Downloads/'+filename);
           let fileurl = app.getPath('downloads')+'/' + filename;
@@ -221,14 +264,21 @@ class DemoDownload {
           } else {
             // console.log(`StartTime: ${downloaditem.getStartTime()}`)
             console.log(`Received bytes: ${downloaditem.getReceivedBytes()}`)
-            itembeginning.downloaditem = downloaditem;
-            let receivedBytes = downloaditem.getReceivedBytes();
-            let startTime = downloaditem.getStartTime();
-            let filesize = downloaditem.getTotalBytes();
-            let filename = downloaditem.getFilename();
-            let fileUrl = downloaditem.getURL(); 
+            let saves = this.getDowanloadInfos(downloaditem)
+            itembeginning.downloaditem = saves;
+            // let receivedBytes = downloaditem.receivedBytes();
+            // let startTime = downloaditem.getStartTime();
+            // let filesize = downloaditem.getTotalBytes();
+            // let filename = downloaditem.getFilename();
+            // let fileUrl = downloaditem.getURL(); 
+            let receivedBytes = saves.receivedBytes;
+            let startTime = saves.startTime;
+            let filesize = saves.totalBytes;
+            let filename = saves.filename;
+            let fileUrl = saves.url; 
             let hasDownloadedBytes = 0
             hasDownloadedBytes += receivedBytes;
+            itembeginning.downloaditem.offset = hasDownloadedBytes;
             let speed = hasDownloadedBytes/(Number(new Date().getTime()/1000) - Number(startTime))
             this.itemsCollection.update(itembeginning)
             this.db.save()

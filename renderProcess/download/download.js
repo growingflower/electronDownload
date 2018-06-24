@@ -8,6 +8,8 @@ class DownloadBlock {
     initBlock(){
         this.sendDownloadMS();
         this.listenDownloading();
+        this.reloadActiveDownloadItems();
+        this.initAlldownloaditems();
     }
     checkIsDownloading (url){
         let downloading = $('.fileItem').find('.data')
@@ -152,15 +154,53 @@ class DownloadBlock {
                 console.log('err')
         }
     }
+    
     reloadActiveDownloadItems () {
         let datas = [];
+        let that = this;
         ipcRenderer.on('reloadActiveDownloadItems', (event,reloadData) =>{
             $.each(reloadData,function(index,value){
-                let data = this.getNewfileSatus(value.downloaditem)
-                datas.push(data)
+                let downloaditem = value.downloaditem
+                let fileValue = {
+                    'name': downloaditem.filename,
+                    'url': downloaditem.url,
+                    'status': 1,
+                    'downloaded': downloaditem.receivedBytes,
+                    'total': downloaditem.totalBytes,
+                    'speed': 0,
+                    'id':downloaditem.startTime*1000000
+                }
+                datas.push(fileValue)
             })
+            
+            console.log(datas)
             render(datas)
             // this.listenDownloading();
+        })
+    }
+
+    initAlldownloaditems () {
+        let datas = [];
+        let that = this;
+        ipcRenderer.on('initAlldownloaditems', (event,reloadData) =>{
+            $.each(reloadData,function(index,value){
+                let downloaditem = value.downloaditem
+                let fileValue = {
+                    'name': downloaditem.filename,
+                    'url': downloaditem.url,
+                    'status': 1,
+                    'downloaded': downloaditem.receivedBytes,
+                    'total': downloaditem.totalBytes,
+                    'speed': 0,
+                    'id':downloaditem.startTime*1000000
+                }
+                addFile(fileValue)
+                that.addClassEvent('continueDownload',fileValue);   
+                that.addClassEvent('pauseDownload',fileValue);  
+                that.addClassEvent('cancelDownload',fileValue);  
+            })
+           
+            // render(datas)
         })
     }
 }
