@@ -3,35 +3,34 @@ const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
 const LokiDB = require('lokijs');
-const db = new LokiDB('download',{
-  autoload:true,
-  autoloadCallback:databaseInitialize
-});
-function databaseInitialize() {
-  var entries = db.getCollection("download");
-  if (entries === null) {
-    entries = db.addCollection("download");
-  }
-  runProgramLogic()
-}
-function runProgramLogic() {
-  itemsCollection = db.getCollection('download')
-  console.log(db,"3333")
-}
-console.log(db,"wwwwww")
+// const db = new LokiDB('download',{
+//   autoload:true,
+//   autoloadCallback:databaseInitialize
+// });
+// function databaseInitialize(){
+//   let entries = db.getCollection("download");
+//   if (entries === null) {
+//     entries = db.addCollection("download");
+//   }
+// }
+
 class DemoDownload {
     constructor () {
       this.mainWindow = null;
       this.activeDownloadItems = null;
       this.progressDownloadItems = null;
       this.tempDownloadItems = new Set();
-
+      this.db = null;
+      this.itemsCollection = null;
+      this.initApp()
     }
-
-    init(){
-      this.initApp();
+    databaseInitialize(db){
+      let entries = db.getCollection("download");
+      if (entries === null) {
+        entries = db.addCollection("download");
+      }
+      return entries
     }
-
     createWindow(){
       let windowOpts = {
         width : 800,
@@ -49,9 +48,13 @@ class DemoDownload {
 
     initApp(){
       app.on('ready',() => {
-        let allDownloadItemsInfos = itemsCollection.find({});
-        console.log("allDownloadItemsInfos",allDownloadItemsInfos)
-        this.createWindow();
+        this.db = new LokiDB('download',{
+          autoload:true,
+        });
+        this.db.addListener('loaded',event => {
+          this.itemsCollection = this.databaseInitialize(this.db)
+          this.createWindow()
+        })
       });
       app.on('window-all-closed',() =>{
         if (process.platform !== 'darwin') {
@@ -63,12 +66,10 @@ class DemoDownload {
       });
       app.on('activate', () => {
         if (this.mainWindow === null) {
-          
-         this. createWindow()
+          this. createWindow()
         }
         if(this.activeDownloadItems){
-          let allDownloadItemsInfos = itemsCollection.find({});
-          console.log("allDownloadItemsInfos",allDownloadItemsInfos)
+          let allDownloadItemsInfos = this.itemsCollection.find({});
           this.mainWindow.webContents.send('reloadActiveDownloadItems',allDownloadItemsInfos)
         }
       })
@@ -113,9 +114,9 @@ class DemoDownload {
       }
     }
 
-    restoreDownload(){
-      ses.createInterruptedDownload(options)
-    }
+    // restoreDownload(){
+    //   ses.createInterruptedDownload(options)
+    // }
 
     listenToDownload(win){
       win.webContents.session.on('will-download', (event, item, webContents) => {
@@ -132,11 +133,11 @@ class DemoDownload {
           this.tempDownloadItems.add(item)
           this.activeDownloadItems = () => this.tempDownloadItems.size;
           //savedownloaditems
-          let itembeginning = itemsCollection.insert({itemid:startTime,downloaditem:item})
-          db.save()
-          item.setSavePath('/Users/mingdao/Downloads/'+filename);
-          // item.setSavePath('/Users/wuqian/Downloads/'+filename);
-          let fileurl = app.getPath('downloads')+'/' + item.getFilename();
+          let itembeginning = this.itemsCollection.insert({itemid:startTime,downloaditem:item})
+          this.db.save()
+          // item.setSavePath('/Users/mingdao/Downloads/'+filename);
+          let fileurl = app.getPath('downloads')+'/' + filename;
+          item.setSavePath(fileurl);
           webContents.send('downloading',downloadItemInfos)
           this.listenToOneItem(item,startTime,fileurl,webContents,itembeginning,win)
       })
@@ -167,6 +168,10 @@ class DemoDownload {
 
       downloaditem.on('done',(event, state)=>{
         this.tempDownloadItems.delete(downloaditem);
+        if(webContents.isDestroyed()){
+          return event.preventDefault();
+        }
+
         if (!webContents.isDestroyed() && !this.activeDownloadItems()) {
           selectedwin.setProgressBar(-1);
         }
@@ -174,6 +179,7 @@ class DemoDownload {
         if (state === 'completed') {
           console.log('Download successfully')
           webContents.send('completed',downloadingInfos)
+
           if (process.platform === 'darwin') {
             app.dock.downloadFinished(fileurl);
           }
@@ -224,8 +230,8 @@ class DemoDownload {
             let hasDownloadedBytes = 0
             hasDownloadedBytes += receivedBytes;
             let speed = hasDownloadedBytes/(Number(new Date().getTime()/1000) - Number(startTime))
-            itemsCollection.update(itembeginning)
-            db.save()
+            this.itemsCollection.update(itembeginning)
+            this.db.save()
             if(!webContents.isDestroyed()){
               let progressDownloadItems = () => hasDownloadedBytes/filesize
               selectedwin.setProgressBar(progressDownloadItems())
@@ -241,5 +247,5 @@ class DemoDownload {
 
 
 
-
-new DemoDownload().init();
+new DemoDownload()
+// new DemoDownload().init();

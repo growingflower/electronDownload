@@ -25,7 +25,7 @@ class DownloadBlock {
         let downloadUrlinput = document.getElementById('downloadUrl')
         downloadBtn.addEventListener('click',(event)=>{
             let url = $.trim(downloadUrlinput.value);
-            if(url && this.checkIsDownloading(url)){
+            if(url){
                 ipcRenderer.send('startdownload',url)
             }else{
                 return
@@ -155,7 +155,12 @@ class DownloadBlock {
     reloadActiveDownloadItems () {
         let datas = [];
         ipcRenderer.on('reloadActiveDownloadItems', (event,reloadData) =>{
-            
+            $.each(reloadData,function(index,value){
+                let data = this.getNewfileSatus(value.downloaditem)
+                datas.push(data)
+            })
+            render(datas)
+            // this.listenDownloading();
         })
     }
 }
