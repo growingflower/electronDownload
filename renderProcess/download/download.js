@@ -52,21 +52,17 @@ class DownloadBlock {
         ipcRenderer.on("downloading",(event, downloadItemInfos,id)=>{
             console.log(downloadItemInfos,"downloadItemInfos")
             console.log(id,"id")
-            //待修改2018/6/25
-            // let fileValue = {'id':id*1000000};
-            // if(downloadItemInfos){
-                let {filesize,startTime,filename,url} = downloadItemInfos
-                let fileValue = {
-                    'name': filename,
-                    'url': url,
-                    'status': 1,
-                    'downloaded': 0,
-                    'total': filesize,
-                    'speed': 0,
-                    'id':startTime*1000000
+            let {filesize,startTime,filename,url} = downloadItemInfos
+            let fileValue = {
+                'name': filename,
+                'url': url,
+                'status': 1,
+                'downloaded': 0,
+                'total': filesize,
+                'speed': 0,
+                'id':startTime*1000000
                 };
-                addFile(fileValue)
-            // }
+            addFile(fileValue)
             
             ipcRenderer.on('receivedBytes',(event,arg,speed,hasDownloadedBytes,startTime,fileUrl,filename,filesize)=>{
                 fileValue.downloaded = Number(arg);
@@ -125,13 +121,13 @@ class DownloadBlock {
                 $("#"+id).on('click','.cancel.ml10',function(e){
                     let value = $('.cancel').parents('.fileItem').find('.data').data('item');
                     updateFile(id, Object.assign({}, value, {
-                            status: STATUS.cancel
+                            status: STATUS.cancaled
                     }));
                     ipcRenderer.send('cancelDownload',id);
                     if(reload === 'initAlldownloaditems'){
                         ipcRenderer.send('cancelinterrupted',id)
                         updateFile(id, Object.assign({}, value, {
-                            status: STATUS.cancel
+                            status: STATUS.cancaled
                         }));
                     }
                 })
@@ -144,6 +140,7 @@ class DownloadBlock {
                     }));
                     console.log("continueDownload")
                     console.log("idididid",id)
+                    console.log(reload,"reload")
                     ipcRenderer.send('continueDownload',id);
                     if(reload === 'initAlldownloaditems'){
                         ipcRenderer.send('reload',id)

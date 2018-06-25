@@ -109,9 +109,13 @@ class DemoDownload {
 
     initReceiveInfo(win){
       ipcMain.on('cancelinterrupted',(event,id)=>{
-        let interruptedItem_cancel = this.itemsCollection.find({startTime:id})
-        interruptedItem_cancel.state = 'isCancelled'
-        this.itemsCollection.update(interruptedItem_cancel)
+        console.log(id,"id")
+        var cancelinterruptedupdate = function(obj){
+          obj.state = 'isCancelled';
+          return obj
+        }
+        this.itemsCollection.findAndUpdate({itemid:id},cancelinterruptedupdate)
+        this.db.save()
       })
       ipcMain.on('reload',(event,id)=>{
         let interruptedItemsInfos = this.itemsCollection.find({itemid:id})
@@ -208,7 +212,7 @@ class DemoDownload {
           // item.setSavePath('/Users/mingdao/Downloads/'+filename);
           let fileurl = app.getPath('downloads')+'/' + filename;
           item.setSavePath(fileurl);
-          webContents.send('downloading',downloadItemInfos)
+          webContents.send('downloading',downloadItemInfos,startTime)
           
           this.listenToOneItem(item,startTime,fileurl,webContents,itembeginning,win,interrupteStartTime,hasdownload)
       })
@@ -341,7 +345,7 @@ class DemoDownload {
             this.itemsCollection.update(itembeginning)
             this.db.save()
           } else {
-            // console.log(`StartTime: ${downloaditem.getStartTime()}`)
+            console.log(`StartTime: ${downloaditem.getStartTime()}`)
             let saves = this.getDowanloadInfos(downloaditem)
             let speed ;
             let receivedBytes;
