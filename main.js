@@ -42,12 +42,25 @@ class DemoDownload {
       let url = path.join('file://', __dirname, '/clientDownloadnew/index.html');
       this.mainWindow.loadURL(url);
       this.mainWindow.on('closed',() => {
+        console.log(ipcMain.listenerCount('reload'),'before')
+        ipcMain.removeAllListeners('removedowanload') 
+        ipcMain.removeAllListeners('cancelinterrupted') 
+        ipcMain.removeAllListeners('reload') 
+        ipcMain.removeAllListeners('openDir') 
+        ipcMain.removeAllListeners('startdownload') 
+        ipcMain.removeAllListeners('pauseDownload') 
+        ipcMain.removeAllListeners('continueDownload')
+        ipcMain.removeAllListeners('cancelDownload') 
+        console.log(ipcMain.listenerCount('reload'),'after')
         this.mainWindow = null;
+        // ipcMain.removeAllListeners()
       });
       this.initReceiveInfo(this.mainWindow);
-      this.listenToDownload(this.mainWindow);
+      if(!arg){
+        this.listenToDownload(this.mainWindow);
+      }
       
-      this.mainWindow.once('ready-to-show', () => {
+        this.mainWindow.once('ready-to-show', () => {
         // if(!arg){
         let allDownloadItemsInfos = this.itemsCollection.find({})
         this.mainWindow.webContents.send('initAlldownloaditems',allDownloadItemsInfos)
@@ -67,6 +80,7 @@ class DemoDownload {
 
     initApp(){
       app.on('ready',() => {
+        console.log('ready')
         this.db = new LokiDB('download',{
           autoload:true,
         });
@@ -84,8 +98,10 @@ class DemoDownload {
         // }
       });
       app.on('activate', () => {
+        console.log('activate')
         if (this.mainWindow === null) {
-          this. createWindow(true)
+          console.log('activatenull')
+          this.createWindow(true)
         }
         // console.log(this.activeDownloadItems(),22222)
         // console.log(this.mainWindow,33333)
@@ -171,14 +187,14 @@ class DemoDownload {
         offset:null
       }
     }
-
     restoreDownload(win,options){
       console.log("i am reload")
+      console.log("options",options)
       this.mainWindow.webContents.session.createInterruptedDownload(options)
     }
-
     listenToDownload(win){
       win.webContents.session.on('will-download', (event, item, webContents) => {
+          console.log(item.getState(),"44444")
           if(item.getTotalBytes() === 0 ){
             event.preventDefault()
             let opts = {type:'warning',message:"wrong downloadUrl"}
@@ -188,14 +204,18 @@ class DemoDownload {
           var webContents = this.mainWindow.webContents;
           var itembeginning
           if(item.getState() === 'interrupted'){
-            // item.resume()
+            console.log(item.getState(),"beginreload")
+            item.resume()
+            console.log(item.getState(),"resumebeginreload")
             var reloadFlag = true
             let start = item.getStartTime()*1000000
             var hasdownload = this.itemsCollection.find({itemid:start})[0].downloaditem.offset
             var startTime = this.itemsCollection.find({itemid:start})[0].downloaditem.startTime*1000000
             var interrupteStartTime = new Date().getTime()/1000
+            var filename = item.getFilename();
             var downloadItemInfos = this.getDowanloadInfos(item)
           }else{
+            console.log(item.getState(),"begin")
             var downloadItemInfos =  this.getDowanloadInfos(item)
             var startTime = (downloadItemInfos.startTime*1000000);
             var filename = downloadItemInfos.filename;
@@ -206,7 +226,6 @@ class DemoDownload {
             itembeginning = this.itemsCollection.insert({itemid:startTime,state:state,downloaditem:downloadItemInfos})
             this.db.save()
           }
-          
           // item.setSavePath('/Users/mingdao/Downloads/'+filename);
           let fileurl = app.getPath('downloads')+'/' + filename;
           item.setSavePath(fileurl);
@@ -226,7 +245,6 @@ class DemoDownload {
           downloaditem.cancel()
         }
       });
-
       ipcMain.on('continueDownload',(event,arg)=>{
         console.log(arg,"continueDownloadid")
         if(startTime == arg){
@@ -234,7 +252,6 @@ class DemoDownload {
         }
        
       });
-
       ipcMain.on('pauseDownload',(event,arg)=>{
         if(startTime == arg){
           downloaditem.pause()
@@ -254,9 +271,6 @@ class DemoDownload {
           downloaditem.pause()
         }
       });
-     
-
-      
       downloaditem.on('done',(event, state)=>{
         let downloadItemInfos =  this.getDowanloadInfos(downloaditem)
         this.tempDownloadItems.delete(downloadItemInfos);
@@ -304,7 +318,6 @@ class DemoDownload {
             this.itemsCollection.findAndUpdate({itemid:time_cancel},cancelupdate)
             this.db.save()
           }
-          
           if(!webContents.isDestroyed()){
             webContents.send('cancelled',downloadingInfos)
             console.log(`Download failed: ${state}`)
@@ -320,8 +333,8 @@ class DemoDownload {
           ipcMain.removeAllListeners(['pauseDownload','continueDownload','cancelDownload'])
         }
       });
-
       downloaditem.on('updated',(event, state)=>{
+        console.log(downloaditem.getState(),"iam in updated")
         if(downloaditem.isDestroyed()){
           event.preventDefault()
           let opts = {type:'warning',message:" download failed"}
@@ -333,7 +346,7 @@ class DemoDownload {
           return
         }
         if (state === 'interrupted') {
-          // downloaditem.resume()
+          downloaditem.resume()
           console.log('Download is interrupted but can be resumed')
         } else if (state === 'progressing') {
           if (downloaditem.isPaused()) {
@@ -409,7 +422,7 @@ class DemoDownload {
                   obj.downloaditem = saves 
                   return obj
                 }
-                
+              console.log(hasDownloadedBytes,"3333333333")
               this.itemsCollection.findAndUpdate({itemid:time},update)
               this.db.save()
             }
