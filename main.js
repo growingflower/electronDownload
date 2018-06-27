@@ -6,6 +6,7 @@ const LokiDB = require('lokijs');
 const menuTemplate = require('./mainProcess/download/menutemplate.js')
 
 class DemoDownload {
+  
     constructor () {
       this.mainWindow = null;
       this.activeDownloadItems = null;
