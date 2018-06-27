@@ -288,5 +288,21 @@ class DownloadBlock {
             // render(datas)
         })
     }
+    // reloadactiveitem(){
+    //     ipcRenderer.on('receivedBytes',(event,arg,speed,hasDownloadedBytes,startTime,fileUrl,filename,filesize)=>{
+    //         let id = startTime*1000000
+    //         let file = $('#startTime').find('.data').data('item');
+    //         let fileValue  = JSON.stringify(file)
+    //         fileValue.downloaded = Number(arg);
+    //         updateFile(startTime*1000000, Object.assign({}, fileValue, {
+    //                 downloaded:hasDownloadedBytes,
+    //                 speed:speed,
+    //                 name:filename,
+    //                 fileUrl:fileUrl,
+    //                 total:filesize,
+    //                 status: fileValue.downloaded === fileValue.total ? STATUS.completed : STATUS.progressing
+    //               }));
+    //     })
+    // }
 }
 new DownloadBlock().initBlock()
